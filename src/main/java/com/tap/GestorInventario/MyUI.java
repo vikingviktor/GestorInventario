@@ -30,11 +30,8 @@ import com.vaadin.ui.Window;
 public class MyUI extends UI {
 	
 	
-	Producto palo = new Producto("Palo", "1");
-	Producto pluma = new Producto("Pluma", "2.5");
-	Producto piedra = new Producto("Piedra", "2");
-	
 	Inventario inventario = new Inventario();
+	Inventario inventario2 = new Inventario();
 	
 	HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
 	Grid<Producto> grid = new Grid<Producto>();
@@ -47,11 +44,7 @@ public class MyUI extends UI {
     protected void init(VaadinRequest vaadinRequest) {
     	
     	HorizontalLayout horizontalLayout = new HorizontalLayout();
-    	/*
-    	Inventario.getInstance().addProduct(palo);
-    	Inventario.getInstance().addProduct(pluma);
-    	Inventario.getInstance().addProduct(piedra);
-    	*/
+    	
     	Window subWindow = new Window("Detalles del Producto");
         VerticalLayout subContent = new VerticalLayout();
         
@@ -73,14 +66,22 @@ public class MyUI extends UI {
         	}
         	else
         	{
-        		selectedProduct.setNumber(selectedProduct.getNumber()-1);
+        		if (true == true){
+        			selectedProduct.setNumber(selectedProduct.getNumber()-1);
+        		}
+        		
+        		grid.setItems(inventario.getProducts());
         	}
         	
         });
         
         buttonAdd.addClickListener(e -> {
         	
-        	selectedProduct.setNumber(selectedProduct.getNumber()+1);
+        	//if (grid.getSelectedItems() == selectedProduct){
+        		selectedProduct.setNumber(selectedProduct.getNumber()+1);
+        	//}
+        	
+        	grid.setItems(inventario.getProducts());
         	
         });
         
@@ -167,7 +168,7 @@ public class MyUI extends UI {
     		textFieldEur.clear();
     		
     		//grid.setItems(Inventario.getInstance().getProducts());
-    		grid.setItems(inventario.getProducts());
+    		
     		
     		
     		Notification.show("Producto creado... ");
@@ -178,15 +179,18 @@ public class MyUI extends UI {
        	
 		
     	buttonBuyProduct.addClickListener(e2 -> {
-        	//grid.setItems(Inventario.getInstance().getProducts());
-    		grid.setItems(inventario.getProducts());
-    		removeWindow(subWindow);
-        
-    	
-        	textFieldName.clear();
-    		textFieldEur.clear();
-    	
-    		Notification.show("Producto comprado...");
+    		
+    		if (selectedProduct.getNumber() != 0) {
+    			selectedProduct.setNumber(selectedProduct.getNumber()-1);
+        		grid.setItems(inventario.getProducts());
+        		removeWindow(subWindow);
+        		Notification.show("Producto comprado...");
+        	}
+    		else {
+    			Notification.show("Producto fuera de stock... Crea más unidades");
+    		}
+    			
+    		
     	});
     		
     		
@@ -210,6 +214,9 @@ public class MyUI extends UI {
     	formLayout.addComponents(
     			buttonCombine
     	);
+    	
+    	grid.setItems(inventario.getProducts());
+    	grid2.setItems(inventario2.getProducts());
     	
     
     	horizontalLayout.addComponents(grid, formLayout, grid2, formLayout2);

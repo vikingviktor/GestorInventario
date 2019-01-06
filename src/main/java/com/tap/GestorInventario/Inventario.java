@@ -13,6 +13,7 @@ public class Inventario {
 	
 	String a;
 	int n;
+	int presupuesto;
 
 	public Inventario() {
 		super();
