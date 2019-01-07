@@ -173,7 +173,7 @@ public class MyUI extends UI {
         	labelValueDol.setValue(String.valueOf(selectedProduct.getValueDol()));
         	labelUnidades.setValue(String.valueOf(selectedProduct.getNumber()));
         	
-        	
+        	removeWindow(subWindow2);
         	removeWindow(subWindow);
         	addWindow(subWindow2);
         	subWindow2.setPositionX(560);
@@ -231,7 +231,6 @@ public class MyUI extends UI {
     		textFieldName.clear();
     		textFieldEur.clear();
     		
-    		//grid.setItems(Inventario.getInstance().getProducts());
     		
     		grid.setItems(inventario.getProducts());
         	grid2.setItems(inventario2.getProducts());
@@ -436,7 +435,6 @@ public class MyUI extends UI {
     	
     
     	horizontalLayout.addComponents(inventarioLayout, formLayout, bolsaLayout, formLayout2);
-    	
     	
     	
     	setContent(horizontalLayout);
