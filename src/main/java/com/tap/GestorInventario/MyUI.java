@@ -1,5 +1,9 @@
 package com.tap.GestorInventario;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Set;
 
 import javax.servlet.annotation.WebServlet;
@@ -8,6 +12,7 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
@@ -16,6 +21,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -36,11 +42,29 @@ public class MyUI extends UI {
 	Inventario inventario = new Inventario();
 	Inventario inventario2 = new Inventario();
 	
+	
+	
+	Date in = new Date();
+	LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	
 	HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
 	Grid<Producto> grid = new Grid<Producto>();
 	Grid<Producto> grid2 = new Grid<Producto>();
+	Grid<Transaccion> grid3 = new Grid<Transaccion>();
 	
+	Label titulo1 = new Label("INVENTARIO (PROVEEDOR)");
+	Label titulo2 = new Label("FÁBRICA (CLIENTE)");
+	Label titulo3 = new Label("TRANSACCIONES");
+	Label relleno1 = new Label("");
+	Label relleno2 = new Label("");
 	Label label = new Label("Configura tu presupuesto inicial en euros: ");
+	Label combinaciones= new Label(
+    		"Las combinaciones posibles son:\n"+
+    		"Flecha: piedra+pluma+palo\n"+
+    		"Arco: palo+palo+cuerda\n"+
+    		"Espada: palo+hierro+hierro\n",
+    		ContentMode.PREFORMATTED);
 	
 	
 	private Producto selectedProduct; 
@@ -125,7 +149,7 @@ public class MyUI extends UI {
         	removeWindow(subWindow);
         	addWindow(subWindow);
         	subWindow.setPositionX(560);
-        	subWindow.setPositionY(200);
+        	subWindow.setPositionY(300);
         	
     	});
     	
@@ -151,8 +175,17 @@ public class MyUI extends UI {
         	removeWindow(subWindow);
         	addWindow(subWindow2);
         	subWindow2.setPositionX(560);
-        	subWindow2.setPositionY(200);
+        	subWindow2.setPositionY(300);
     	});
+    	
+    	// Grid Transacciones
+    	
+    	grid3.addColumn(Transaccion::getCodTrans).setCaption("Cod. Transaccion");
+    	grid3.addColumn(Transaccion::getFecha).setCaption("Fecha");
+    	grid3.addColumn(Transaccion::getCoste).setCaption("Coste");
+    	grid3.setSelectionMode(SelectionMode.SINGLE);
+    	
+    	
     	
     	
     	/* FORM */
@@ -165,7 +198,7 @@ public class MyUI extends UI {
     	Button buttonAddProduct = new Button("Crear nuevo producto");
     	Button buttonBuyProduct = new Button("Comprar producto");
         Button buttonSellProduct = new Button("Vender producto");
-        Button buttonCombine = new Button("Combinar Productos");
+        Button buttonCombine = new Button("Crear combinando materiales");
         
         TextField textFieldMoney = new TextField("Presupuesto: ");
         	
@@ -202,9 +235,22 @@ public class MyUI extends UI {
         	}
     		else {
     			if (inventario2.getPresupuesto() > Double.parseDouble(selectedProduct.getValueEur())) {
+    				
+    				Transaccion transaccion = new Transaccion();
+    				
     				selectedProduct.setNumber(selectedProduct.getNumber()-1);
     				inventario2.setPresupuesto(inventario2.getPresupuesto() - Double.parseDouble(selectedProduct.getValueEur()));
+    				
+    				inventario2.actualizarProductos(inventario2.addUnit(selectedProduct.getName(), inventario2.getProducts()));
+    				transaccion.setCodTrans("Compra");
+    				transaccion.setFecha(ldt.format(formatter));
+    				transaccion.setCoste(Double.parseDouble(selectedProduct.getValueEur()));
+    				inventario2.addTransaction(transaccion);
+    				
 	        		grid.setItems(inventario.getProducts());
+	        		grid2.setItems(inventario2.getProducts());
+	        		grid3.setItems(inventario2.getTransactions());
+	        		
 	        		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
 	        		removeWindow(subWindow);
 	        		Notification.show("Producto comprado...");
@@ -223,12 +269,66 @@ public class MyUI extends UI {
     			Notification.show("No tienes unidades de este producto... Compra más");
         	}
     		else {
+    			
+    			Transaccion transaccion = new Transaccion();
 				selectedProduct.setNumber(selectedProduct.getNumber()-1);
 				inventario2.setPresupuesto(inventario2.getPresupuesto() + Double.parseDouble(selectedProduct.getValueEur()));
+				
+				transaccion.setCodTrans("Venta");
+				transaccion.setFecha(ldt.format(formatter));
+				transaccion.setCoste(Double.parseDouble(selectedProduct.getValueEur()));
+				inventario2.addTransaction(transaccion);
+				
         		grid2.setItems(inventario2.getProducts());
+        		grid3.setItems(inventario2.getTransactions());
+        		
         		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
         		removeWindow(subWindow2);
         		Notification.show("Producto vendido...");
+    		}
+    			
+    		
+    	});
+    	
+    	
+    	buttonCombine.addClickListener(e2 -> {
+    		
+    		if (selectedProduct.getName() == "Flecha") {
+    			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Pluma", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Piedra", inventario2.getProducts()).getNumber() > 0){
+    				selectedProduct.setNumber(selectedProduct.getNumber()+1);
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Piedra", inventario2.getProducts()));
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Pluma", inventario2.getProducts()));
+	    			Notification.show("Flecha creada...");
+	    			grid2.setItems(inventario2.getProducts());
+    			}
+				
+        	}
+    		else if (selectedProduct.getName() == "Arco") {
+    			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 1 || inventario2.getUnit("Cuerda", inventario2.getProducts()).getNumber() > 0){
+    				selectedProduct.setNumber(selectedProduct.getNumber()+1);
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Cuerda", inventario2.getProducts()));
+	    			Notification.show("Arco creado...");
+	    			grid2.setItems(inventario2.getProducts());
+    			}
+				
+        	}
+    		else if (selectedProduct.getName() == "Espada") {
+    			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Hierro", inventario2.getProducts()).getNumber() > 1){
+    				selectedProduct.setNumber(selectedProduct.getNumber()+1);
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Hierro", inventario2.getProducts()));
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+	    			inventario2.actualizarProductos(inventario2.substractUnit("Hierro", inventario2.getProducts()));
+	    			Notification.show("Espada creada...");
+	    			grid2.setItems(inventario2.getProducts());
+    			}
+				
+        	}
+    		else {
+				
+        		Notification.show("No existen combinaciones para este producto o no tienes los materiales necesarios...");
     		}
     			
     		
@@ -237,6 +337,7 @@ public class MyUI extends UI {
     	
     	
     	formLayout.addComponents(
+    			relleno1,
     			textFieldName,
     	    	textFieldEur,
     	    	buttonAddProduct
@@ -262,6 +363,7 @@ public class MyUI extends UI {
     	});
     	
     	formLayout2.addComponents(
+    			relleno2,
     			label,
     			textFieldMoney,
     			buttonMoney
@@ -280,8 +382,27 @@ public class MyUI extends UI {
     	grid.setItems(inventario.getProducts());
     	grid2.setItems(inventario2.getProducts());
     	
+    	FormLayout inventarioLayout = new FormLayout();
+    	
+    	inventarioLayout.addComponents(
+    			titulo1,
+    			grid,
+    			titulo3,
+    			grid3
+    			
+    	);
+    	
+    	FormLayout bolsaLayout = new FormLayout();
+    	
+    	bolsaLayout.addComponents(
+    			titulo2,
+    			grid2,
+    			combinaciones
+    	);
+    	
+    	
     
-    	horizontalLayout.addComponents(grid, formLayout, grid2, formLayout2);
+    	horizontalLayout.addComponents(inventarioLayout, formLayout, bolsaLayout, formLayout2);
     	
     	
     	
