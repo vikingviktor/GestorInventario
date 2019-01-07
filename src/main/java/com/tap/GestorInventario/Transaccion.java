@@ -5,8 +5,15 @@ public class Transaccion {
 	String codTrans;
 	String fecha;
 	double coste;
+	double beneficioAct;
 	
 	
+	public double getBeneficioAct() {
+		return beneficioAct;
+	}
+	public void setBeneficioAct(double beneficioAct) {
+		this.beneficioAct = beneficioAct;
+	}
 	public double getCoste() {
 		return coste;
 	}

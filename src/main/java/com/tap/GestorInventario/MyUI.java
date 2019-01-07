@@ -21,11 +21,11 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window 
@@ -59,6 +59,8 @@ public class MyUI extends UI {
 	Label relleno1 = new Label("");
 	Label relleno2 = new Label("");
 	Label label = new Label("Configura tu presupuesto inicial en euros: ");
+	Label labelEur = new Label("EUROS: ");
+	Label labelDol = new Label("DÓLARES: ");
 	Label combinaciones= new Label(
     		"Las combinaciones posibles son:\n"+
     		"Flecha: piedra+pluma+palo\n"+
@@ -183,6 +185,7 @@ public class MyUI extends UI {
     	grid3.addColumn(Transaccion::getCodTrans).setCaption("Cod. Transaccion");
     	grid3.addColumn(Transaccion::getFecha).setCaption("Fecha");
     	grid3.addColumn(Transaccion::getCoste).setCaption("Coste");
+    	grid3.addColumn(Transaccion::getBeneficioAct).setCaption("Beneficio de la Transacción");
     	grid3.setSelectionMode(SelectionMode.SINGLE);
     	
     	
@@ -200,7 +203,19 @@ public class MyUI extends UI {
         Button buttonSellProduct = new Button("Vender producto");
         Button buttonCombine = new Button("Crear combinando materiales");
         
-        TextField textFieldMoney = new TextField("Presupuesto: ");
+        TextField textFieldMoney = new TextField("Presupuesto Inicial: ");
+        TextField textFieldCurrentMoney = new TextField("Presupuesto Actual: ");
+        TextField textFieldRevenue = new TextField("Beneficios: ");
+        
+        TextField textFieldMoneyDol = new TextField("Presupuesto Inicial (DOL): ");
+        TextField textFieldCurrentMoneyDol = new TextField("Presupuesto Actual: ");
+        TextField textFieldRevenueDol = new TextField("Beneficios: ");
+        
+        textFieldMoneyDol.setReadOnly(true);
+		textFieldCurrentMoney.setReadOnly(true);
+		textFieldRevenue.setReadOnly(true);
+		textFieldCurrentMoneyDol.setReadOnly(true);
+		textFieldRevenueDol.setReadOnly(true);
         	
     	buttonAddProduct.addClickListener(e -> {
     		
@@ -245,13 +260,17 @@ public class MyUI extends UI {
     				transaccion.setCodTrans("Compra");
     				transaccion.setFecha(ldt.format(formatter));
     				transaccion.setCoste(Double.parseDouble(selectedProduct.getValueEur()));
+    				transaccion.setBeneficioAct(inventario2.getPresupuesto() - Double.parseDouble(textFieldMoney.getValue()));
     				inventario2.addTransaction(transaccion);
     				
 	        		grid.setItems(inventario.getProducts());
 	        		grid2.setItems(inventario2.getProducts());
 	        		grid3.setItems(inventario2.getTransactions());
 	        		
-	        		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+	        		textFieldCurrentMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+	        		textFieldRevenue.setValue(Double.toString(inventario2.getPresupuesto() - Double.parseDouble(textFieldMoney.getValue())));
+	        		textFieldCurrentMoneyDol.setValue(Double.toString(inventario2.getPresupuesto()*1.2));
+	        		textFieldRevenueDol.setValue(Double.toString((inventario2.getPresupuesto() - Double.parseDouble(textFieldMoney.getValue()))*1.2));
 	        		removeWindow(subWindow);
 	        		Notification.show("Producto comprado...");
     			}
@@ -277,12 +296,16 @@ public class MyUI extends UI {
 				transaccion.setCodTrans("Venta");
 				transaccion.setFecha(ldt.format(formatter));
 				transaccion.setCoste(Double.parseDouble(selectedProduct.getValueEur()));
+				transaccion.setBeneficioAct(inventario2.getPresupuesto() - Double.parseDouble(textFieldMoney.getValue()));
 				inventario2.addTransaction(transaccion);
 				
         		grid2.setItems(inventario2.getProducts());
         		grid3.setItems(inventario2.getTransactions());
         		
-        		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+        		textFieldCurrentMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+        		textFieldRevenue.setValue(Double.toString(inventario2.getPresupuesto() - Double.parseDouble(textFieldMoney.getValue())));
+        		textFieldCurrentMoneyDol.setValue(Double.toString(inventario2.getPresupuesto()*1.2));
+        		textFieldRevenueDol.setValue(Double.toString((inventario2.getPresupuesto() - Double.parseDouble(textFieldMoney.getValue()))*1.2));
         		removeWindow(subWindow2);
         		Notification.show("Producto vendido...");
     		}
@@ -357,6 +380,9 @@ public class MyUI extends UI {
     		
     		textFieldMoney.setReadOnly(true);
     		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+    		textFieldCurrentMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+    		textFieldMoneyDol.setValue(Double.toString(inventario2.getPresupuesto()*1.2));
+    		textFieldCurrentMoneyDol.setValue(Double.toString(inventario2.getPresupuesto()*1.2));
     		
     		Notification.show("Presupuesto inicializado... ");
     		
@@ -366,7 +392,14 @@ public class MyUI extends UI {
     			relleno2,
     			label,
     			textFieldMoney,
-    			buttonMoney
+    			textFieldMoneyDol,
+    			buttonMoney,
+    			labelEur,
+    			textFieldCurrentMoney,
+    			textFieldRevenue,
+    			labelDol,
+    			textFieldCurrentMoneyDol,
+    			textFieldRevenueDol
     	);
     	
     	// Ventanas subwindow
