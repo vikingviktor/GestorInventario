@@ -1,5 +1,7 @@
 package com.tap.GestorInventario;
 
+import java.util.Set;
+
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
@@ -66,23 +68,29 @@ public class MyUI extends UI {
         	}
         	else
         	{
-        		if (true == true){
+        		if ((grid.getSelectedItems() == selectedProduct) //A cambiar
+        		{
         			selectedProduct.setNumber(selectedProduct.getNumber()-1);
+        			grid.setItems(inventario.getProducts());
         		}
+        		else
+        			Notification.show("No se pueden añadir o eliminar productos en tu inventario, compra o vende...");
         		
-        		grid.setItems(inventario.getProducts());
         	}
         	
         });
         
         buttonAdd.addClickListener(e -> {
         	
-        	//if (grid.getSelectedItems() == selectedProduct){
-        		selectedProduct.setNumber(selectedProduct.getNumber()+1);
-        	//}
         	
-        	grid.setItems(inventario.getProducts());
-        	
+        	if (grid.getSelectedItems() == selectedProduct)
+    		{
+    			selectedProduct.setNumber(selectedProduct.getNumber()+1);
+    			grid.setItems(inventario.getProducts());
+    		}
+    		else
+    			Notification.show("No se pueden añadir o eliminar productos en tu inventario, compra o vende...");
+    		
         });
         
       
@@ -161,15 +169,17 @@ public class MyUI extends UI {
     				textFieldEur.getValue()
     				);
     		
-    		//Inventario.getInstance().addProduct(p);
+    		
     		inventario.addProduct(p);
+    		inventario2.addProduct(p);
     		
     		textFieldName.clear();
     		textFieldEur.clear();
     		
     		//grid.setItems(Inventario.getInstance().getProducts());
     		
-    		
+    		grid.setItems(inventario.getProducts());
+        	grid2.setItems(inventario2.getProducts());
     		
     		Notification.show("Producto creado... ");
     		
