@@ -30,7 +30,8 @@ import com.vaadin.ui.Window;
  */
 @Theme("mytheme")
 public class MyUI extends UI {
-	
+
+	int i = 0;
 	
 	Inventario inventario = new Inventario();
 	Inventario inventario2 = new Inventario();
@@ -38,6 +39,8 @@ public class MyUI extends UI {
 	HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
 	Grid<Producto> grid = new Grid<Producto>();
 	Grid<Producto> grid2 = new Grid<Producto>();
+	
+	Label label = new Label("Configura tu presupuesto inicial en euros: ");
 	
 	
 	private Producto selectedProduct; 
@@ -48,7 +51,14 @@ public class MyUI extends UI {
     	HorizontalLayout horizontalLayout = new HorizontalLayout();
     	
     	Window subWindow = new Window("Detalles del Producto");
+    	Window subWindow2 = new Window("Opciones: ");
+    	
+    	subWindow.setHeight("340px");
+    	subWindow.setWidth("250px");
+    	
+    	
         VerticalLayout subContent = new VerticalLayout();
+        VerticalLayout subContent2 = new VerticalLayout();
         
         Label labelValueEur = new Label();
         Label labelName = new Label();
@@ -60,22 +70,24 @@ public class MyUI extends UI {
         buttonDelete.addClickListener(e -> {
         	
         	if (selectedProduct.getNumber() == 0) {
-        		//Inventario.getInstance().deleteProduct(selectedProduct);
-        		inventario.deleteProduct(selectedProduct);
-        	//grid.setItems(Inventario.getInstance().getProducts());
-        	grid.setItems(inventario.getProducts());
-        	removeWindow(subWindow);
+        		if (i == 0) {
+        			Notification.show("¿Seguro que quieres eliminar el producto completamente? (Presiona otra vez eliminar para borrar)");
+        			i = 1;
+        		}
+        		else {
+        			inventario.deleteProduct(selectedProduct);
+		        	grid.setItems(inventario.getProducts());
+		        	removeWindow(subWindow);
+		        	i = 0;
+        		}
+        		
         	}
         	else
         	{
-        		if ((grid.getSelectedItems() == selectedProduct) //A cambiar
-        		{
-        			selectedProduct.setNumber(selectedProduct.getNumber()-1);
-        			grid.setItems(inventario.getProducts());
-        		}
-        		else
-        			Notification.show("No se pueden añadir o eliminar productos en tu inventario, compra o vende...");
         		
+    			selectedProduct.setNumber(selectedProduct.getNumber()-1);
+    			grid.setItems(inventario.getProducts());
+    		
         	}
         	
         });
@@ -83,22 +95,10 @@ public class MyUI extends UI {
         buttonAdd.addClickListener(e -> {
         	
         	
-        	if (grid.getSelectedItems() == selectedProduct)
-    		{
-    			selectedProduct.setNumber(selectedProduct.getNumber()+1);
-    			grid.setItems(inventario.getProducts());
-    		}
-    		else
-    			Notification.show("No se pueden añadir o eliminar productos en tu inventario, compra o vende...");
-    		
+			selectedProduct.setNumber(selectedProduct.getNumber()+1);
+			grid.setItems(inventario.getProducts());
+		
         });
-        
-      
-        subContent.addComponents(labelName, labelValueEur, labelValueDol, labelUnidades, buttonDelete, buttonAdd);
-        
-        
-        subWindow.center();
-        subWindow.setContent(subContent);
         
         
     	
@@ -113,6 +113,7 @@ public class MyUI extends UI {
     	
     	grid.addItemClickListener(event -> {
     		
+    		i = 0;
     		selectedProduct = event.getItem();
     		
         	labelName.setValue(selectedProduct.getName());
@@ -120,9 +121,11 @@ public class MyUI extends UI {
         	labelValueDol.setValue(String.valueOf(selectedProduct.getValueDol()));
         	labelUnidades.setValue(String.valueOf(selectedProduct.getNumber()));
         	
-        	
+        	removeWindow(subWindow2);
         	removeWindow(subWindow);
         	addWindow(subWindow);
+        	subWindow.setPositionX(560);
+        	subWindow.setPositionY(200);
         	
     	});
     	
@@ -146,8 +149,9 @@ public class MyUI extends UI {
         	
         	
         	removeWindow(subWindow);
-        	addWindow(subWindow);
-        	
+        	addWindow(subWindow2);
+        	subWindow2.setPositionX(560);
+        	subWindow2.setPositionY(200);
     	});
     	
     	
@@ -161,6 +165,9 @@ public class MyUI extends UI {
     	Button buttonAddProduct = new Button("Crear nuevo producto");
     	Button buttonBuyProduct = new Button("Comprar producto");
         Button buttonSellProduct = new Button("Vender producto");
+        Button buttonCombine = new Button("Combinar Productos");
+        
+        TextField textFieldMoney = new TextField("Presupuesto: ");
         	
     	buttonAddProduct.addClickListener(e -> {
     		
@@ -190,40 +197,85 @@ public class MyUI extends UI {
 		
     	buttonBuyProduct.addClickListener(e2 -> {
     		
-    		if (selectedProduct.getNumber() != 0) {
-    			selectedProduct.setNumber(selectedProduct.getNumber()-1);
-        		grid.setItems(inventario.getProducts());
-        		removeWindow(subWindow);
-        		Notification.show("Producto comprado...");
+    		if (selectedProduct.getNumber() == 0) {
+    			Notification.show("Producto fuera de stock... Crea más unidades");
         	}
     		else {
-    			Notification.show("Producto fuera de stock... Crea más unidades");
+    			if (inventario2.getPresupuesto() > Double.parseDouble(selectedProduct.getValueEur())) {
+    				selectedProduct.setNumber(selectedProduct.getNumber()-1);
+    				inventario2.setPresupuesto(inventario2.getPresupuesto() - Double.parseDouble(selectedProduct.getValueEur()));
+	        		grid.setItems(inventario.getProducts());
+	        		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+	        		removeWindow(subWindow);
+	        		Notification.show("Producto comprado...");
+    			}
+    			else
+    				Notification.show("No hay suficiente presupuesto...");
+    			
     		}
     			
     		
     	});
+    	
+    	buttonSellProduct.addClickListener(e2 -> {
     		
+    		if (selectedProduct.getNumber() == 0) {
+    			Notification.show("No tienes unidades de este producto... Compra más");
+        	}
+    		else {
+				selectedProduct.setNumber(selectedProduct.getNumber()-1);
+				inventario2.setPresupuesto(inventario2.getPresupuesto() + Double.parseDouble(selectedProduct.getValueEur()));
+        		grid2.setItems(inventario2.getProducts());
+        		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+        		removeWindow(subWindow2);
+        		Notification.show("Producto vendido...");
+    		}
+    			
     		
+    	});
     		
     	
     	
     	formLayout.addComponents(
     			textFieldName,
     	    	textFieldEur,
-    	    	buttonAddProduct,
-    			buttonBuyProduct, 
-    			buttonSellProduct
+    	    	buttonAddProduct
     	);
     	
+    	// Presupuesto
     	
     	FormLayout formLayout2 = new FormLayout();
     	
     	
-    	Button buttonCombine = new Button("Combinar Productos");
     	
-    	formLayout.addComponents(
-    			buttonCombine
+    	Button buttonMoney = new Button("Asignar Presupuesto");
+    	
+    	buttonMoney.addClickListener(e -> {
+    		
+    		inventario2.setPresupuesto(Double.parseDouble(textFieldMoney.getValue()));		
+    		
+    		textFieldMoney.setReadOnly(true);
+    		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
+    		
+    		Notification.show("Presupuesto inicializado... ");
+    		
+    	});
+    	
+    	formLayout2.addComponents(
+    			label,
+    			textFieldMoney,
+    			buttonMoney
     	);
+    	
+    	// Ventanas subwindow
+    	subContent.addComponents(labelName, labelValueEur, labelValueDol, labelUnidades, buttonDelete, buttonAdd, buttonBuyProduct);
+        
+        subWindow.center();
+        subWindow.setContent(subContent);
+    	
+    	subContent2.addComponents(buttonSellProduct, buttonCombine);
+        
+        subWindow2.setContent(subContent2);	
     	
     	grid.setItems(inventario.getProducts());
     	grid2.setItems(inventario2.getProducts());

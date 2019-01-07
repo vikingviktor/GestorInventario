@@ -13,7 +13,17 @@ public class Inventario {
 	
 	String a;
 	int n;
-	int presupuesto;
+	double presupuesto;
+
+	public double getPresupuesto() {
+		return presupuesto;
+	}
+
+
+	public void setPresupuesto(double presupuesto) {
+		this.presupuesto = presupuesto;
+	}
+
 
 	public Inventario() {
 		super();
