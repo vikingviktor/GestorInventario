@@ -53,6 +53,8 @@ public class MyUI extends UI {
 	Grid<Producto> grid2 = new Grid<Producto>();
 	Grid<Transaccion> grid3 = new Grid<Transaccion>();
 	
+	// Labels
+	
 	Label titulo1 = new Label("INVENTARIO (PROVEEDOR)");
 	Label titulo2 = new Label("FÁBRICA (CLIENTE)");
 	Label titulo3 = new Label("TRANSACCIONES");
