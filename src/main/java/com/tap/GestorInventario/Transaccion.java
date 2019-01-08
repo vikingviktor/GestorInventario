@@ -32,6 +32,5 @@ public class Transaccion {
 	public void setFecha(String fecha) {
 		this.fecha = fecha;
 	}
-	
 
 }

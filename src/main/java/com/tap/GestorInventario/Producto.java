@@ -45,9 +45,9 @@ public class Producto {
 		return valueDol;
 	}
 	
-	/*
-	public void setValueDol() {
-		this.valueDol = 1.2*Double.parseDouble(valueEur);
+	
+	public void eliminarProducto(Producto prod) {
+		prod.setNumber(prod.getNumber()-1);
 	}
-	*/
+	
 }

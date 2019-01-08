@@ -3,6 +3,8 @@ package com.tap.GestorInventario;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.ui.Notification;
+
 public class Inventario {
 	
 	private List<Producto> productos;
@@ -90,8 +92,7 @@ public class Inventario {
 			    return null;
 	}
 	
-	public List<Producto> substractUnit(
-			  String name, List<Producto> prods) {
+	public List<Producto> substractUnit(String name, List<Producto> prods) {
 			 
 			    for (Producto prod : prods) {
 			        if (prod.getName().equals(name)) {
@@ -102,8 +103,7 @@ public class Inventario {
 			    return null;
 	}
 	
-	public Producto getUnit(
-			  String name, List<Producto> prods) {
+	public Producto getUnit(String name, List<Producto> prods) {
 			 
 			    for (Producto prod : prods) {
 			        if (prod.getName().equals(name)) {
@@ -116,6 +116,43 @@ public class Inventario {
 	public void actualizarProductos(List<Producto> prods) {
 		
 		this.productos = prods;
+	}
+	
+	public void combinarproductos(Producto prod, Inventario inventario2) {
+		if (prod.getName() == "Flecha") {
+			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Pluma", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Piedra", inventario2.getProducts()).getNumber() > 0){
+				prod.setNumber(prod.getNumber()+1);
+    			inventario2.actualizarProductos(inventario2.substractUnit("Piedra", inventario2.getProducts()));
+    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+    			inventario2.actualizarProductos(inventario2.substractUnit("Pluma", inventario2.getProducts()));
+    			Notification.show("Flecha creada...");
+			}
+			
+    	}
+		else if (prod.getName() == "Arco") {
+			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 1 || inventario2.getUnit("Cuerda", inventario2.getProducts()).getNumber() > 0){
+				prod.setNumber(prod.getNumber()+1);
+    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+    			inventario2.actualizarProductos(inventario2.substractUnit("Cuerda", inventario2.getProducts()));
+    			Notification.show("Arco creado...");
+			}
+			
+    	}
+		else if (prod.getName() == "Espada") {
+			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Hierro", inventario2.getProducts()).getNumber() > 1){
+				prod.setNumber(prod.getNumber()+1);
+    			inventario2.actualizarProductos(inventario2.substractUnit("Hierro", inventario2.getProducts()));
+    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
+    			inventario2.actualizarProductos(inventario2.substractUnit("Hierro", inventario2.getProducts()));
+    			Notification.show("Espada creada...");
+			}
+			
+    	}
+		else {
+			
+    		Notification.show("No existen combinaciones para este producto o no tienes los materiales necesarios...");
+		}
 	}
 
 }

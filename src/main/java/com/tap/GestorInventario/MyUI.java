@@ -53,8 +53,6 @@ public class MyUI extends UI {
 	Grid<Producto> grid2 = new Grid<Producto>();
 	Grid<Transaccion> grid3 = new Grid<Transaccion>();
 	
-	// Labels
-	
 	Label titulo1 = new Label("INVENTARIO (PROVEEDOR)");
 	Label titulo2 = new Label("FÁBRICA (CLIENTE)");
 	Label titulo3 = new Label("TRANSACCIONES");
@@ -113,7 +111,7 @@ public class MyUI extends UI {
         	else
         	{
         		
-    			selectedProduct.setNumber(selectedProduct.getNumber()-1);
+    			selectedProduct.eliminarProducto(selectedProduct);
     			grid.setItems(inventario.getProducts());
     		
         	}
@@ -254,7 +252,7 @@ public class MyUI extends UI {
     				
     				Transaccion transaccion = new Transaccion();
     				
-    				selectedProduct.setNumber(selectedProduct.getNumber()-1);
+        			selectedProduct.eliminarProducto(selectedProduct);
     				inventario2.setPresupuesto(inventario2.getPresupuesto() - Double.parseDouble(selectedProduct.getValueEur()));
     				
     				inventario2.actualizarProductos(inventario2.addUnit(selectedProduct.getName(), inventario2.getProducts()));
@@ -291,7 +289,7 @@ public class MyUI extends UI {
     		else {
     			
     			Transaccion transaccion = new Transaccion();
-				selectedProduct.setNumber(selectedProduct.getNumber()-1);
+    			selectedProduct.eliminarProducto(selectedProduct);
 				inventario2.setPresupuesto(inventario2.getPresupuesto() + Double.parseDouble(selectedProduct.getValueEur()));
 				
 				transaccion.setCodTrans("Venta");
@@ -314,52 +312,11 @@ public class MyUI extends UI {
     		
     	});
     	
-    	
     	buttonCombine.addClickListener(e2 -> {
-    		
-    		if (selectedProduct.getName() == "Flecha") {
-    			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Pluma", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Piedra", inventario2.getProducts()).getNumber() > 0){
-    				selectedProduct.setNumber(selectedProduct.getNumber()+1);
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Piedra", inventario2.getProducts()));
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Pluma", inventario2.getProducts()));
-	    			Notification.show("Flecha creada...");
-	    			grid2.setItems(inventario2.getProducts());
-    			}
-				
-        	}
-    		else if (selectedProduct.getName() == "Arco") {
-    			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 1 || inventario2.getUnit("Cuerda", inventario2.getProducts()).getNumber() > 0){
-    				selectedProduct.setNumber(selectedProduct.getNumber()+1);
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Cuerda", inventario2.getProducts()));
-	    			Notification.show("Arco creado...");
-	    			grid2.setItems(inventario2.getProducts());
-    			}
-				
-        	}
-    		else if (selectedProduct.getName() == "Espada") {
-    			if (inventario2.getUnit("Palo", inventario2.getProducts()).getNumber() > 0 || inventario2.getUnit("Hierro", inventario2.getProducts()).getNumber() > 1){
-    				selectedProduct.setNumber(selectedProduct.getNumber()+1);
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Hierro", inventario2.getProducts()));
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Palo", inventario2.getProducts()));
-	    			inventario2.actualizarProductos(inventario2.substractUnit("Hierro", inventario2.getProducts()));
-	    			Notification.show("Espada creada...");
-	    			grid2.setItems(inventario2.getProducts());
-    			}
-				
-        	}
-    		else {
-				
-        		Notification.show("No existen combinaciones para este producto o no tienes los materiales necesarios...");
-    		}
-    			
-    		
+    		inventario.combinarproductos(selectedProduct, inventario2);
+			grid2.setItems(inventario2.getProducts());
+ 
     	});
-    		
-    	
-    	
     	formLayout.addComponents(
     			relleno1,
     			textFieldName,
@@ -370,21 +327,16 @@ public class MyUI extends UI {
     	// Presupuesto
     	
     	FormLayout formLayout2 = new FormLayout();
-    	
-    	
-    	
     	Button buttonMoney = new Button("Asignar Presupuesto");
     	
     	buttonMoney.addClickListener(e -> {
     		
     		inventario2.setPresupuesto(Double.parseDouble(textFieldMoney.getValue()));		
-    		
     		textFieldMoney.setReadOnly(true);
     		textFieldMoney.setValue(Double.toString(inventario2.getPresupuesto()));
     		textFieldCurrentMoney.setValue(Double.toString(inventario2.getPresupuesto()));
     		textFieldMoneyDol.setValue(Double.toString(inventario2.getPresupuesto()*1.2));
     		textFieldCurrentMoneyDol.setValue(Double.toString(inventario2.getPresupuesto()*1.2));
-    		
     		Notification.show("Presupuesto inicializado... ");
     		
     	});
@@ -405,19 +357,13 @@ public class MyUI extends UI {
     	
     	// Ventanas subwindow
     	subContent.addComponents(labelName, labelValueEur, labelValueDol, labelUnidades, buttonDelete, buttonAdd, buttonBuyProduct);
-        
         subWindow.center();
         subWindow.setContent(subContent);
-    	
     	subContent2.addComponents(buttonSellProduct, buttonCombine);
-        
         subWindow2.setContent(subContent2);	
-    	
     	grid.setItems(inventario.getProducts());
     	grid2.setItems(inventario2.getProducts());
-    	
     	FormLayout inventarioLayout = new FormLayout();
-    	
     	inventarioLayout.addComponents(
     			titulo1,
     			grid,
@@ -425,23 +371,15 @@ public class MyUI extends UI {
     			grid3
     			
     	);
-    	
     	FormLayout bolsaLayout = new FormLayout();
     	
     	bolsaLayout.addComponents(
     			titulo2,
     			grid2,
     			combinaciones
-    	);
-    	
-    	
-    
+    	);    
     	horizontalLayout.addComponents(inventarioLayout, formLayout, bolsaLayout, formLayout2);
-    	
-    	
     	setContent(horizontalLayout);
-    	
-    
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
