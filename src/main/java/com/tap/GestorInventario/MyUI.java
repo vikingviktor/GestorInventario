@@ -121,7 +121,7 @@ public class MyUI extends UI {
         buttonAdd.addClickListener(e -> {
         	
         	
-			selectedProduct.setNumber(selectedProduct.getNumber()+1);
+        	selectedProduct.aniadirProducto(selectedProduct);
 			grid.setItems(inventario.getProducts());
 		
         });
@@ -383,7 +383,7 @@ public class MyUI extends UI {
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
-    @VaadinServletConfiguration(ui = MyUI.class, productionMode = true)
+    @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
     }
 }

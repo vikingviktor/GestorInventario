@@ -50,4 +50,8 @@ public class Producto {
 		prod.setNumber(prod.getNumber()-1);
 	}
 	
+	public void aniadirProducto(Producto prod) {
+		prod.setNumber(prod.getNumber()+1);
+	}
+	
 }
